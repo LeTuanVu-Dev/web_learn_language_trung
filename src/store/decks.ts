@@ -1,11 +1,16 @@
 import { create } from 'zustand'
-import { DeckEntry } from '../types'
+import { DeckEntry, WordEntry } from '../types'
 
 const STORAGE_KEY = 'hanzixue_decks'
 
-const builtinDecks: DeckEntry[] = [
-  { id: 'hsk1', name: 'HSK 1 (150 từ)', wordIds: [], isCustom: false, createdAt: 0 },
-]
+const builtinDecks: DeckEntry[] = [1, 2, 3, 4, 5].map((level) => ({
+  id: `hsk${level}`,
+  name: `HSK ${level}`,
+  wordIds: [],
+  isCustom: false,
+  createdAt: 0,
+  sourceType: 'builtin',
+}))
 
 function load(): DeckEntry[] {
   try {
@@ -26,7 +31,7 @@ function saveCustom(decks: DeckEntry[]) {
 
 interface DecksStore {
   decks: DeckEntry[]
-  createDeck: (name: string, wordIds?: string[]) => string
+  createDeck: (name: string, wordIds?: string[], meta?: Partial<DeckEntry>) => string
   deleteDeck: (id: string) => void
   addWord: (deckId: string, wordId: string) => void
   removeWord: (deckId: string, wordId: string) => void
@@ -36,9 +41,18 @@ interface DecksStore {
 export const useDecks = create<DecksStore>((setState) => ({
   decks: load(),
 
-  createDeck(name, wordIds = []) {
+  createDeck(name, wordIds = [], meta = {}) {
     const id = `custom_${Date.now()}`
-    const deck: DeckEntry = { id, name, wordIds, isCustom: true, createdAt: Date.now() }
+    const deck: DeckEntry = {
+      id,
+      name,
+      wordIds,
+      isCustom: true,
+      createdAt: Date.now(),
+      sourceType: meta.sourceType ?? 'manual',
+      sourceLabel: meta.sourceLabel,
+      importedCount: meta.importedCount ?? wordIds.length,
+    }
     setState((prev) => {
       const next = [...prev.decks, deck]
       saveCustom(next)
@@ -90,11 +104,16 @@ export const useDecks = create<DecksStore>((setState) => ({
   },
 }))
 
-export function getDeckWords(deckId: string, allWords: import('../types').WordEntry[]) {
-  if (deckId === 'hsk1') return allWords.filter((word) => word.hskLevel === 1)
+export function getDeckWords(deckId: string, allWords: WordEntry[]) {
+  if (/^hsk[1-6]$/i.test(deckId)) {
+    const level = Number(deckId.replace('hsk', ''))
+    return allWords.filter((word) => word.hskLevel === level)
+  }
+
   const { decks } = useDecks.getState()
   const deck = decks.find((entry) => entry.id === deckId)
   if (!deck) return []
+
   const wordMap = new Map(allWords.map((word) => [word.id, word]))
-  return deck.wordIds.map((id) => wordMap.get(id)).filter(Boolean) as import('../types').WordEntry[]
+  return deck.wordIds.map((id) => wordMap.get(id)).filter(Boolean) as WordEntry[]
 }

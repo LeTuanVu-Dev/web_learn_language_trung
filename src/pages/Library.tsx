@@ -1,26 +1,36 @@
 import { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { allWords, getAllTopics, getHskLevels } from '../data'
 import { WordEntry } from '../types'
 import { useSettings } from '../store/settings'
+import { useVocabularyStore } from '../store/vocabulary'
 
 export function Library() {
   const [search, setSearch] = useState('')
   const [hskFilter, setHskFilter] = useState<number | 'all'>('all')
   const [topicFilter, setTopicFilter] = useState<string | 'all'>('all')
-  const { primaryLanguage: lang, showPinyin } = useSettings()
-  const topics = useMemo(() => getAllTopics(), [])
-  const levels = useMemo(() => getHskLevels(), [])
+  const { primaryLanguage: lang } = useSettings()
+  const { words, officialTopics } = useVocabularyStore((state) => ({
+    words: state.words,
+    officialTopics: state.officialTopics,
+  }))
+
+  const levels = useMemo(() => {
+    const hskLevels = new Set<number>()
+    words.forEach((word) => {
+      if (word.hskLevel) hskLevels.add(word.hskLevel)
+    })
+    return Array.from(hskLevels).sort((a, b) => a - b)
+  }, [words])
 
   const filtered = useMemo(() => {
-    let words = allWords
+    let list = words
 
-    if (hskFilter !== 'all') words = words.filter((word) => word.hskLevel === hskFilter)
-    if (topicFilter !== 'all') words = words.filter((word) => word.topics.includes(topicFilter))
+    if (hskFilter !== 'all') list = list.filter((word) => word.hskLevel === hskFilter)
+    if (topicFilter !== 'all') list = list.filter((word) => word.topics.includes(topicFilter))
 
     if (search.trim()) {
       const query = search.trim().toLowerCase()
-      words = words.filter((word) =>
+      list = list.filter((word) =>
         word.hanzi.includes(query) ||
         word.pinyin.toLowerCase().includes(query) ||
         word.meaningsVi.some((meaning) => meaning.toLowerCase().includes(query)) ||
@@ -28,69 +38,69 @@ export function Library() {
       )
     }
 
-    return words
-  }, [search, hskFilter, topicFilter])
+    return list
+  }, [words, hskFilter, topicFilter, search])
 
   return (
-    <div className="py-4 flex flex-col gap-4">
+    <div className="flex flex-col gap-4 py-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-200">Thư viện</h1>
-        <span className="text-sm text-gray-500">{filtered.length} từ</span>
+        <h1 className="text-lg font-semibold text-gray-900">Thu vien</h1>
+        <span className="text-sm text-gray-600">{filtered.length} tu</span>
       </div>
 
       <input
         type="search"
-        placeholder="Tìm chữ, pinyin, nghĩa..."
+        placeholder="Tim chu, pinyin, nghia..."
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        className="w-full rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none focus:border-pinyin transition-colors"
+        className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 outline-none transition-colors focus:border-pinyin"
       />
 
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
         {(['all', ...levels] as const).map((level) => (
           <button
             key={level}
             onClick={() => setHskFilter(level)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs border transition-colors ${
+            className={`flex-shrink-0 rounded-full border px-3 py-1.5 text-xs transition-colors ${
               hskFilter === level
                 ? 'border-hanzi bg-hanzi/10 text-hanzi'
-                : 'border-border text-gray-500 hover:border-gray-500'
+                : 'border-border text-gray-700 hover:border-gray-500'
             }`}
           >
-            {level === 'all' ? 'Tất cả' : `HSK ${level}`}
+            {level === 'all' ? 'Tat ca' : `HSK ${level}`}
           </button>
         ))}
 
-        <div className="w-px bg-border flex-shrink-0" />
+        <div className="w-px flex-shrink-0 bg-border" />
 
-        {topics.map((topic) => (
+        {officialTopics.map((topic) => (
           <button
-            key={topic}
-            onClick={() => setTopicFilter(topic === topicFilter ? 'all' : topic)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs border transition-colors ${
-              topicFilter === topic
+            key={topic.id}
+            onClick={() => setTopicFilter(topicFilter === topic.name ? 'all' : topic.name)}
+            className={`flex-shrink-0 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+              topicFilter === topic.name
                 ? 'border-pinyin bg-pinyin/10 text-pinyin'
-                : 'border-border text-gray-500 hover:border-gray-500'
+                : 'border-border text-gray-700 hover:border-gray-500'
             }`}
           >
-            {topic}
+            {topic.name}
           </button>
         ))}
       </div>
 
       <div className="flex flex-col gap-1">
         {filtered.map((word) => (
-          <WordRow key={word.id} word={word} lang={lang} showPinyin={showPinyin} />
+          <WordRow key={word.id} word={word} lang={lang} />
         ))}
         {filtered.length === 0 && (
-          <p className="text-center text-gray-600 py-8 text-sm">Không tìm thấy mục từ phù hợp.</p>
+          <p className="py-8 text-center text-sm text-gray-600">Khong tim thay muc tu phu hop.</p>
         )}
       </div>
     </div>
   )
 }
 
-function WordRow({ word, lang, showPinyin }: { word: WordEntry; lang: string; showPinyin: boolean }) {
+function WordRow({ word, lang }: { word: WordEntry; lang: string }) {
   const meanings = lang === 'vi'
     ? (word.meaningsVi.length > 0 ? word.meaningsVi : word.meaningsEn)
     : (word.meaningsEn.length > 0 ? word.meaningsEn : word.meaningsVi)
@@ -98,17 +108,17 @@ function WordRow({ word, lang, showPinyin }: { word: WordEntry; lang: string; sh
   return (
     <NavLink
       to={`/character/${word.id}`}
-      className="flex items-center gap-4 rounded-xl border border-transparent hover:border-border hover:bg-surface-2 px-3 py-2.5 transition-all active:scale-[0.98]"
+      className="flex items-center gap-4 rounded-xl border border-transparent px-3 py-2.5 transition-all hover:border-border hover:bg-white active:scale-[0.98]"
     >
-      <span className="font-hanzi text-3xl text-hanzi w-12 text-center flex-shrink-0 leading-none">
+      <span className="w-12 flex-shrink-0 text-center font-hanzi text-3xl leading-none text-hanzi">
         {word.hanzi}
       </span>
-      <div className="flex-1 min-w-0">
-        {showPinyin && <p className="text-xs text-pinyin">{word.pinyin}</p>}
-        <p className="text-sm text-gray-300 truncate">{meanings.join('；')}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-pinyin">{word.pinyin || '—'}</p>
+        <p className="truncate text-sm text-gray-800">{meanings.join('；')}</p>
       </div>
       {word.hskLevel && (
-        <span className="text-[10px] border border-gray-700 rounded px-1 text-gray-600 flex-shrink-0">
+        <span className="flex-shrink-0 rounded border border-gray-300 px-1 text-[10px] text-gray-600">
           HSK{word.hskLevel}
         </span>
       )}

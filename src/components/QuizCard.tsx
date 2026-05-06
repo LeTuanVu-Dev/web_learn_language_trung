@@ -13,6 +13,7 @@ type State = 'unanswered' | 'correct' | 'wrong'
 export function QuizCard({ question, wordMap, onAnswer }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [state, setState] = useState<State>('unanswered')
+  const [showHintPinyin, setShowHintPinyin] = useState(false)
   const { showPinyin, showSecondaryLanguage } = useSettings()
 
   const word = wordMap.get(question.wordId)
@@ -28,31 +29,44 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
 
   function choiceClass(id: string) {
     if (state === 'unanswered') {
-      return 'border-border bg-surface-2 text-gray-200 hover:border-pinyin hover:text-white active:scale-[0.97]'
+      return 'border-border bg-surface-2 text-gray-900 hover:border-pinyin active:scale-[0.97]'
     }
-    if (id === question.correctId) return 'border-green-600 bg-green-900/30 text-green-300'
-    if (id === selected) return 'border-red-600 bg-red-900/30 text-red-300'
-    return 'border-border bg-surface-2 text-gray-500 opacity-60'
+    if (id === question.correctId) return 'border-green-500 bg-green-50 text-gray-900'
+    if (id === selected) return 'border-red-500 bg-red-50 text-gray-900'
+    return 'border-border bg-surface-2 text-gray-500 opacity-75'
   }
 
+  const revealPinyin = showPinyin && (showHintPinyin || state !== 'unanswered')
+
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-5 animate-slide-up">
-      <div className="rounded-2xl border border-border bg-surface-2 p-6 flex flex-col items-center gap-2 min-h-[120px] justify-center">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-5 animate-slide-up">
+      <div className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-surface-2 p-6">
         {isHanziPrompt ? (
           <>
-            <p className="font-hanzi text-6xl text-hanzi leading-none">{question.promptHanzi}</p>
-            {showPinyin && question.promptPinyin && (
-              <p className="text-base text-pinyin font-ui">{question.promptPinyin}</p>
+            <p className="font-hanzi text-6xl leading-none text-hanzi">{question.promptHanzi}</p>
+            {revealPinyin && question.promptPinyin && (
+              <p className="font-ui text-base text-pinyin">{question.promptPinyin}</p>
             )}
-            <p className="text-xs text-gray-600 mt-1">
-              {question.lang === 'vi' ? 'Chọn nghĩa đúng' : 'Choose the correct meaning'}
+            <p className="mt-1 text-xs text-gray-600">
+              {question.lang === 'vi' ? 'Chon nghia dung' : 'Choose the correct meaning'}
             </p>
+            {showPinyin && state === 'unanswered' && (
+              <button
+                onClick={() => setShowHintPinyin((value) => !value)}
+                className="rounded-full border border-pinyin/30 px-3 py-1 text-xs text-pinyin hover:bg-pinyin/10"
+              >
+                {showHintPinyin ? 'An pinyin' : 'Goi y pinyin'}
+              </button>
+            )}
           </>
         ) : (
           <>
-            <p className="text-lg text-gray-200 font-ui text-center">{question.prompt}</p>
-            <p className="text-xs text-gray-600 mt-1">
-              {question.lang === 'vi' ? 'Chọn chữ Hán đúng' : 'Pick the matching hanzi'}
+            <p className="text-center font-ui text-lg text-gray-900">{question.prompt}</p>
+            {revealPinyin && word?.pinyin && (
+              <p className="text-sm text-pinyin">{word.pinyin}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-600">
+              {question.lang === 'vi' ? 'Chon chu Han dung' : 'Pick the matching hanzi'}
             </p>
           </>
         )}
@@ -63,32 +77,32 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
           <button
             key={choice.id}
             onClick={() => choose(choice.id)}
-            className={`rounded-xl border p-3 text-center transition-all duration-150 cursor-pointer ${
+            className={`rounded-xl border p-3 text-center transition-all duration-150 ${
               choice.hanzi ? 'font-hanzi text-3xl' : 'font-ui text-sm leading-tight'
             } ${choiceClass(choice.id)}`}
           >
             {choice.hanzi ?? choice.text}
             {state !== 'unanswered' && choice.id === question.correctId && !choice.hanzi && (
-              <span className="block text-xs text-green-400 mt-0.5">✓</span>
+              <span className="mt-0.5 block text-xs text-green-600">✓</span>
             )}
           </button>
         ))}
       </div>
 
       {state !== 'unanswered' && word && (
-        <div className="rounded-xl border border-border bg-surface-3 p-4 animate-slide-up">
+        <div className="rounded-xl border border-border bg-white p-4 animate-slide-up">
           <div className="flex items-baseline gap-3">
             <span className="font-hanzi text-2xl text-hanzi">{word.hanzi}</span>
             {showPinyin && <span className="text-sm text-pinyin">{word.pinyin}</span>}
           </div>
-          <p className="text-sm text-gray-300 mt-1">
+          <p className="mt-1 text-sm text-gray-800">
             {(question.lang === 'vi'
               ? (word.meaningsVi.length > 0 ? word.meaningsVi : word.meaningsEn)
               : (word.meaningsEn.length > 0 ? word.meaningsEn : word.meaningsVi)
             ).join(question.lang === 'vi' ? '；' : ', ')}
           </p>
           {showSecondaryLanguage && (
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="mt-0.5 text-xs text-gray-600">
               {(question.lang === 'vi' ? word.meaningsEn : word.meaningsVi).join(question.lang === 'vi' ? ', ' : '；')}
             </p>
           )}

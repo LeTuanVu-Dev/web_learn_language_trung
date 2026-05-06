@@ -1,6 +1,7 @@
 import { LessonSpec, WordEntry } from '../types'
-import { allWords, getWordsByHsk, getWordsByTopic, getWordsByRadical } from '../data'
 import { getDeckWords } from '../store/decks'
+import { getAllRadicals } from '../data'
+import { getVocabularyWords } from '../store/vocabulary'
 
 function shuffle<T>(items: T[]): T[] {
   const arr = [...items]
@@ -12,17 +13,18 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 export function buildLesson(spec: LessonSpec): WordEntry[] {
+  const allWords = getVocabularyWords()
   let pool: WordEntry[]
 
   switch (spec.source) {
     case 'hsk':
-      pool = getWordsByHsk(spec.filters.hskLevel ?? 1)
+      pool = allWords.filter((word) => word.hskLevel === (spec.filters.hskLevel ?? 1))
       break
     case 'topic':
-      pool = getWordsByTopic(spec.filters.topic ?? '')
+      pool = allWords.filter((word) => word.topics.includes(spec.filters.topic ?? ''))
       break
     case 'radical':
-      pool = getWordsByRadical(spec.filters.radical ?? '')
+      pool = allWords.filter((word) => word.radicals.includes(spec.filters.radical ?? ''))
       break
     case 'deck':
       pool = getDeckWords(spec.filters.deckId ?? '', allWords)
@@ -44,7 +46,7 @@ export function buildLesson(spec: LessonSpec): WordEntry[] {
 export function defaultLessonSpec(): LessonSpec {
   return {
     source: 'hsk',
-    filters: { hskLevel: 1 },
+    filters: { hskLevel: 1, radical: getAllRadicals()[0] ?? undefined },
     size: 20,
     modeMix: ['flashcard', 'quiz', 'write'],
     primaryLanguage: 'vi',

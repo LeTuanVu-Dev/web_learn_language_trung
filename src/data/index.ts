@@ -1,5 +1,6 @@
 import { WordEntry } from '../types'
 import { hsk1Words } from './hsk1'
+import { generatedHskFallbackWords } from './generated-hsk-fallback'
 import { commonRadicals as rawCommonRadicals } from './radicals'
 
 const cp1252ReverseMap = new Map<number, number>([
@@ -44,7 +45,18 @@ function normalizeValue<T>(value: T): T {
 }
 
 export const commonRadicals = normalizeValue(rawCommonRadicals)
-export const allWords: WordEntry[] = normalizeValue(hsk1Words)
+const builtinWords = normalizeValue([...hsk1Words, ...generatedHskFallbackWords]).map((word) => ({
+  ...word,
+  source: word.source ?? 'builtin',
+}))
+const dedupedWords = new Map<string, WordEntry>()
+
+for (const word of builtinWords) {
+  const key = `${word.simplified}::${word.pinyin}`
+  if (!dedupedWords.has(key)) dedupedWords.set(key, word)
+}
+
+export const allWords: WordEntry[] = Array.from(dedupedWords.values())
 
 export const wordById = new Map<string, WordEntry>(allWords.map((word) => [word.id, word]))
 export const wordByHanzi = new Map<string, WordEntry>(allWords.map((word) => [word.hanzi, word]))

@@ -6,45 +6,45 @@ export function Settings() {
   const settings = useSettings()
 
   return (
-    <div className="py-4 flex flex-col gap-6">
-      <h1 className="text-lg font-semibold text-gray-200">Cài đặt</h1>
+    <div className="flex flex-col gap-6 py-4">
+      <h1 className="text-lg font-semibold text-gray-900">Cai dat</h1>
 
-      <Section title="Ngôn ngữ học">
+      <Section title="Ngon ngu hoc">
         <RadioGroup
-          label="Ngôn ngữ chính"
+          label="Ngon ngu chinh"
           value={settings.primaryLanguage}
           onChange={(value) => settings.set('primaryLanguage', value as Lang)}
           options={[
-            { value: 'vi', label: 'Tiếng Việt', sub: 'Trung → Việt' },
+            { value: 'vi', label: 'Tieng Viet', sub: 'Trung → Viet' },
             { value: 'en', label: 'English', sub: 'Chinese → English' },
           ]}
         />
         <Toggle
-          label="Hiện ngôn ngữ phụ"
-          sub={settings.primaryLanguage === 'vi' ? 'Hiện thêm nghĩa tiếng Anh' : 'Hiện thêm nghĩa tiếng Việt'}
+          label="Hien ngon ngu phu"
+          sub={settings.primaryLanguage === 'vi' ? 'Hien them nghia tieng Anh' : 'Hien them nghia tieng Viet'}
           value={settings.showSecondaryLanguage}
           onChange={(value) => settings.set('showSecondaryLanguage', value)}
         />
       </Section>
 
-      <Section title="Hiển thị">
+      <Section title="Pinyin">
         <Toggle
-          label="Hiện Pinyin"
-          sub="Hiện phiên âm dưới chữ Hán"
+          label="Cho phep pinyin o hint/dap an"
+          sub="Khong hien san tren mat hoc chinh; chi hien khi goi y hoac sau khi tra loi."
           value={settings.showPinyin}
           onChange={(value) => settings.set('showPinyin', value)}
         />
       </Section>
 
-      <Section title="Luyện viết">
+      <Section title="Luyen viet">
         <RadioGroup
-          label="Chế độ chấm"
+          label="Che do cham"
           value={settings.writingCheckMode}
           onChange={(value) => settings.set('writingCheckMode', value as WritingCheckMode)}
           options={[
-            { value: 'auto', label: 'Tự động', sub: 'Strict nếu có dữ liệu, ngược lại dùng shape' },
-            { value: 'strict', label: 'Strict', sub: 'Kiểm tra số nét, thứ tự và hướng nét' },
-            { value: 'shape', label: 'Shape', sub: 'Chấm dựa vào hình dạng tổng thể' },
+            { value: 'auto', label: 'Tu dong', sub: 'Uu tien cham theo do giong hinh dang.' },
+            { value: 'strict', label: 'Strict', sub: 'Gan nhan strict de phan biet ket qua, nhung van hien % tuong dong.' },
+            { value: 'shape', label: 'Shape', sub: 'Cham theo hinh dang tong the, bo qua khac biet to nho.' },
           ]}
         />
       </Section>
@@ -52,9 +52,9 @@ export function Settings() {
       <div className="pt-2">
         <button
           onClick={settings.reset}
-          className="w-full py-3 rounded-xl border border-border text-gray-500 text-sm hover:border-red-700 hover:text-red-400 transition-colors"
+          className="w-full rounded-xl border border-border py-3 text-sm text-gray-700 transition-colors hover:border-red-400 hover:text-red-700"
         >
-          Đặt lại về mặc định
+          Dat lai ve mac dinh
         </button>
       </div>
     </div>
@@ -64,8 +64,8 @@ export function Settings() {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</h2>
-      <div className="rounded-2xl border border-border bg-surface-2 divide-y divide-border overflow-hidden">
+      <h2 className="text-xs font-medium uppercase tracking-wider text-gray-600">{title}</h2>
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 divide-y divide-border">
         {children}
       </div>
     </div>
@@ -84,17 +84,17 @@ function Toggle({
   onChange: (value: boolean) => void
 }) {
   return (
-    <div className="flex items-center justify-between p-4 gap-4">
+    <div className="flex items-center justify-between gap-4 p-4">
       <div>
-        <p className="text-sm text-gray-200">{label}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
+        <p className="text-sm text-gray-900">{label}</p>
+        <p className="mt-0.5 text-xs text-gray-600">{sub}</p>
       </div>
       <button
         role="switch"
         aria-checked={value}
         onClick={() => onChange(!value)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
-          value ? 'bg-pinyin' : 'bg-gray-700'
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+          value ? 'bg-pinyin' : 'bg-gray-400'
         }`}
       >
         <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
@@ -117,22 +117,26 @@ function RadioGroup<T extends string>({
   options: { value: T; label: string; sub?: string }[]
 }) {
   return (
-    <div className="p-4 flex flex-col gap-2">
-      <p className="text-sm text-gray-200 mb-1">{label}</p>
+    <div className="flex flex-col gap-2 p-4">
+      <p className="mb-1 text-sm text-gray-900">{label}</p>
       {options.map((option) => (
-        <label key={option.value} className="flex items-start gap-3 cursor-pointer">
-          <div className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border-2 transition-colors ${
-            value === option.value ? 'border-pinyin bg-pinyin' : 'border-gray-600'
-          }`}>
+        <label key={option.value} className="flex cursor-pointer items-start gap-3">
+          <button
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={`mt-0.5 h-4 w-4 flex-shrink-0 rounded-full border-2 transition-colors ${
+              value === option.value ? 'border-pinyin bg-pinyin' : 'border-gray-400'
+            }`}
+          >
             {value === option.value && (
-              <span className="flex items-center justify-center h-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-white block" />
+              <span className="flex h-full items-center justify-center">
+                <span className="block h-1.5 w-1.5 rounded-full bg-white" />
               </span>
             )}
-          </div>
-          <div onClick={() => onChange(option.value)}>
-            <p className="text-sm text-gray-200">{option.label}</p>
-            {option.sub && <p className="text-xs text-gray-500">{option.sub}</p>}
+          </button>
+          <div>
+            <p className="text-sm text-gray-900">{option.label}</p>
+            {option.sub && <p className="text-xs text-gray-600">{option.sub}</p>}
           </div>
         </label>
       ))}

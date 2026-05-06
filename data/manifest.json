@@ -1,14 +1,18 @@
 {
-  "generatedAt": "2026-05-05T13:58:27.048Z",
+  "generatedAt": "2026-05-06T13:13:16.063Z",
   "stats": {
-    "wordCount": 150,
+    "wordCount": 3881,
     "topicCount": 64,
-    "radicalCount": 90,
+    "radicalCount": 231,
     "hskLevels": [
-      1
+      1,
+      2,
+      3,
+      4,
+      5
     ],
-    "characterCount": 171,
-    "strokeAssetCount": 171
+    "characterCount": 1490,
+    "strokeAssetCount": 1490
   },
   "missingStrokeChars": []
 }

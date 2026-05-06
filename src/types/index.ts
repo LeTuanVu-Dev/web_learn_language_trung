@@ -1,6 +1,9 @@
 export type Lang = 'vi' | 'en'
 export type LearningMode = 'zh-vi' | 'zh-en' | 'zh-bilingual'
 export type WritingCheckMode = 'strict' | 'shape' | 'auto'
+export type VocabularySource = 'builtin' | 'imported' | 'runtime'
+export type TopicSource = 'runtime' | 'local-fallback' | 'derived'
+export type DeckSourceType = 'builtin' | 'manual' | 'imported-file' | 'topic-generated'
 
 export interface ExampleEntry {
   zh: string
@@ -23,6 +26,7 @@ export interface WordEntry {
   radicals: string[]
   characterIds: string[]
   strokeCount?: number
+  source?: VocabularySource
 }
 
 export interface CharacterEntry {
@@ -43,6 +47,9 @@ export interface DeckEntry {
   wordIds: string[]
   isCustom: boolean
   createdAt: number
+  sourceType?: DeckSourceType
+  sourceLabel?: string
+  importedCount?: number
 }
 
 export interface LessonSpec {
@@ -65,6 +72,40 @@ export interface Settings {
   showPinyin: boolean
   writingCheckMode: WritingCheckMode
   learningMode: LearningMode
+}
+
+export interface TopicEntry {
+  id: string
+  name: string
+  slug: string
+  wordIds: string[]
+  source: TopicSource
+}
+
+export interface WritingScoreResult {
+  similarityPct: number
+  status: 'excellent' | 'good' | 'needs-practice'
+  rawMetrics: {
+    referencePoints: number
+    drawnPoints: number
+    overlapPct: number
+  }
+  fallbackMode?: 'shape' | 'strict'
+}
+
+export interface ImportedWordEntry extends WordEntry {
+  importSourceLabel?: string
+}
+
+export interface DeckImportPreview {
+  rowsRead: number
+  validRows: number
+  invalidRows: number
+  createdWords: number
+  updatedWords: number
+  wordIds: string[]
+  words: ImportedWordEntry[]
+  errors: string[]
 }
 
 export interface QuizQuestion {
