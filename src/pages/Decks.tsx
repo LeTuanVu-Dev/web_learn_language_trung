@@ -7,11 +7,9 @@ import { DeckImportPreview } from '../types'
 
 export function Decks() {
   const { decks, createDeck, deleteDeck } = useDecks()
-  const { officialTopics, words, upsertImportedWords } = useVocabularyStore((state) => ({
-    officialTopics: state.officialTopics,
-    words: state.words,
-    upsertImportedWords: state.upsertImportedWords,
-  }))
+  const officialTopics = useVocabularyStore((state) => state.officialTopics)
+  const words = useVocabularyStore((state) => state.words)
+  const upsertImportedWords = useVocabularyStore((state) => state.upsertImportedWords)
   const [newName, setNewName] = useState('')
   const [selectedTopicId, setSelectedTopicId] = useState(officialTopics[0]?.id ?? '')
   const [importPreview, setImportPreview] = useState<DeckImportPreview | null>(null)

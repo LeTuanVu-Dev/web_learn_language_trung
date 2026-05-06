@@ -9,10 +9,8 @@ export function Library() {
   const [hskFilter, setHskFilter] = useState<number | 'all'>('all')
   const [topicFilter, setTopicFilter] = useState<string | 'all'>('all')
   const { primaryLanguage: lang } = useSettings()
-  const { words, officialTopics } = useVocabularyStore((state) => ({
-    words: state.words,
-    officialTopics: state.officialTopics,
-  }))
+  const words = useVocabularyStore((state) => state.words)
+  const officialTopics = useVocabularyStore((state) => state.officialTopics)
 
   const levels = useMemo(() => {
     const hskLevels = new Set<number>()

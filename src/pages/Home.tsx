@@ -12,12 +12,10 @@ const cards = [
 ]
 
 export function Home() {
-  const { words, officialTopics, syncStatus, syncMessage } = useVocabularyStore((state) => ({
-    words: state.words,
-    officialTopics: state.officialTopics,
-    syncStatus: state.syncStatus,
-    syncMessage: state.syncMessage,
-  }))
+  const words = useVocabularyStore((state) => state.words)
+  const officialTopics = useVocabularyStore((state) => state.officialTopics)
+  const syncStatus = useVocabularyStore((state) => state.syncStatus)
+  const syncMessage = useVocabularyStore((state) => state.syncMessage)
 
   const radicalCount = useMemo(() => {
     const radicals = new Set<string>()

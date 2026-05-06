@@ -1,6 +1,5 @@
 import { PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
 import HanziWriter from 'hanzi-writer'
-import { hanziCharacterData } from '../generated/hanzi-data'
 import { WritingScoreResult } from '../types'
 import { Point, scoreWritingSimilarity } from '../utils/writing-score'
 
@@ -73,8 +72,9 @@ export function WritingCanvas({
   const [activeStroke, setActiveStroke] = useState<Stroke>([])
   const [result, setResult] = useState<WritingScoreResult | null>(null)
   const [pointerId, setPointerId] = useState<number | null>(null)
+  const [characterMap, setCharacterMap] = useState<Record<string, unknown>>({})
 
-  const charData = useMemo(() => hanziCharacterData[char] as HanziCharData | undefined, [char])
+  const charData = useMemo(() => characterMap[char] as HanziCharData | undefined, [characterMap, char])
   const referenceStrokes = useMemo(() => toReferenceStrokes(charData), [charData])
 
   useEffect(() => {
@@ -92,6 +92,10 @@ export function WritingCanvas({
       const size = Math.min(referenceRef.current.offsetWidth, 320) || 280
 
       try {
+        const module = await import('../generated/hanzi-data')
+        if (cancelled) return
+        setCharacterMap(module.hanziCharacterData as Record<string, unknown>)
+
         writerRef.current = HanziWriter.create(referenceRef.current, char, {
           width: size,
           height: size,
@@ -102,7 +106,7 @@ export function WritingCanvas({
           outlineColor: '#d7dde6',
           radicalColor: '#7c3aed',
           charDataLoader(targetChar, onLoad, onError) {
-            const data = hanziCharacterData[targetChar]
+            const data = module.hanziCharacterData[targetChar]
             if (data) onLoad(data as any)
             else onError()
           },

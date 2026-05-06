@@ -51,12 +51,10 @@ function buildSteps(words: WordEntry[], lang: 'vi' | 'en', mix: LessonSpec['mode
 export function Lesson() {
   const settings = useSettings()
   const { decks } = useDecks()
-  const { words: allWords, officialTopics, syncStatus, syncMessage } = useVocabularyStore((state) => ({
-    words: state.words,
-    officialTopics: state.officialTopics,
-    syncStatus: state.syncStatus,
-    syncMessage: state.syncMessage,
-  }))
+  const allWords = useVocabularyStore((state) => state.words)
+  const officialTopics = useVocabularyStore((state) => state.officialTopics)
+  const syncStatus = useVocabularyStore((state) => state.syncStatus)
+  const syncMessage = useVocabularyStore((state) => state.syncMessage)
   const radicals = useMemo(() => getAllRadicals(), [])
   const hskLevels = useMemo(() => {
     const levels = new Set<number>()
