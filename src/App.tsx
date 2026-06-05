@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './components/Layout'
+import { useSettings } from './store/settings'
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })))
 const Library = lazy(() => import('./pages/Library').then((module) => ({ default: module.Library })))
@@ -13,9 +14,12 @@ const Settings = lazy(() => import('./pages/Settings').then((module) => ({ defau
 const Lesson = lazy(() => import('./pages/Lesson').then((module) => ({ default: module.Lesson })))
 
 function PageShell({ children }: { children: ReactNode }) {
+  const { primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
+
   return (
     <Layout>
-      <Suspense fallback={<div className="py-8 text-center text-sm text-gray-600">Dang tai...</div>}>
+      <Suspense fallback={<div className="py-8 text-center text-sm text-gray-600">{isVi ? 'Đang tải...' : 'Loading...'}</div>}>
         {children}
       </Suspense>
     </Layout>

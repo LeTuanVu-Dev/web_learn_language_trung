@@ -9,7 +9,6 @@ export function Home() {
   const words = useVocabularyStore((state) => state.words)
   const officialTopics = useVocabularyStore((state) => state.officialTopics)
   const syncStatus = useVocabularyStore((state) => state.syncStatus)
-  const syncMessage = useVocabularyStore((state) => state.syncMessage)
 
   const cards = [
     { to: '/lesson', icon: '课', title: isVi ? 'Học ngay' : 'Start learning', sub: isVi ? 'Lesson ngẫu nhiên' : 'Random lesson', color: 'border-hanzi/40 hover:border-hanzi' },
@@ -27,12 +26,23 @@ export function Home() {
   }, [words])
 
   const featuredTopics = officialTopics.slice(0, 6)
-  const fallbackMessage = isVi
-    ? 'Đang dùng dữ liệu fallback đã đóng gói sẵn.'
-    : 'Using bundled fallback data.'
+  const syncText = syncStatus === 'loading'
+    ? (isVi ? 'Đang đồng bộ danh sách chủ đề...' : 'Syncing topic catalog...')
+    : (isVi ? 'Đang dùng dữ liệu fallback đã đóng gói sẵn.' : 'Using bundled fallback data.')
 
   return (
     <div className="flex flex-col gap-6 py-6">
+      <div className="flex justify-end">
+        <NavLink
+          to="/settings"
+          aria-label={isVi ? 'Cài đặt' : 'Settings'}
+          title={isVi ? 'Cài đặt' : 'Settings'}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface-2 text-xl text-gray-700 shadow-sm transition-colors hover:border-pinyin hover:text-pinyin"
+        >
+          ⚙
+        </NavLink>
+      </div>
+
       <div className="rounded-[28px] border border-border bg-surface-2/90 p-6 pt-7 text-center shadow-[0_10px_40px_rgba(199,168,120,0.12)]">
         <div className="mb-2 font-hanzi text-6xl text-hanzi">汉字学</div>
         <p className="text-base text-gray-900">{isVi ? 'Học chữ Hán từ gốc' : 'Learn Hanzi from the roots'}</p>
@@ -50,9 +60,7 @@ export function Home() {
           <span><span className="font-medium text-vi">{radicalCount}</span> {isVi ? 'bộ thủ' : 'radicals'}</span>
         </div>
         <p className={`text-xs ${syncStatus === 'loading' ? 'text-pinyin' : 'text-gray-600'}`}>
-          {syncStatus === 'loading'
-            ? (isVi ? 'Đang đồng bộ danh sách chủ đề...' : 'Syncing topic catalog...')
-            : syncMessage || fallbackMessage}
+          {syncText}
         </p>
       </div>
 
@@ -98,12 +106,6 @@ export function Home() {
             <span className="text-xs text-gray-600">{isVi ? 'Chưa có chủ đề cache.' : 'No cached topics yet.'}</span>
           )}
         </div>
-      </div>
-
-      <div className="flex justify-end">
-        <NavLink to="/settings" className="text-xs text-gray-600 transition-colors hover:text-gray-900">
-          {isVi ? 'Cài đặt ngôn ngữ và cách học' : 'Language and study settings'}
-        </NavLink>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
 import HanziWriter from 'hanzi-writer'
 import { WritingScoreResult } from '../types'
+import { useSettings } from '../store/settings'
 import { Point, scoreWritingSimilarity } from '../utils/writing-score'
 
 interface Props {
@@ -73,6 +74,8 @@ export function WritingCanvas({
   const [result, setResult] = useState<WritingScoreResult | null>(null)
   const [pointerId, setPointerId] = useState<number | null>(null)
   const [characterMap, setCharacterMap] = useState<Record<string, unknown>>({})
+  const { primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
 
   const charData = useMemo(() => characterMap[char] as HanziCharData | undefined, [characterMap, char])
   const referenceStrokes = useMemo(() => toReferenceStrokes(charData), [charData])
@@ -210,7 +213,7 @@ export function WritingCanvas({
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface-2 p-6">
         <p className="font-hanzi text-7xl text-hanzi">{char}</p>
         <p className="text-center text-sm text-gray-600">
-          Chua co du lieu cham tuong dong cho chu nay.
+          {isVi ? 'Chưa có dữ liệu chấm tương đồng cho chữ này.' : 'No similarity scoring data is available for this character.'}
         </p>
       </div>
     )
@@ -236,13 +239,15 @@ export function WritingCanvas({
         {result ? (
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="font-medium text-gray-900">Do tuong dong: {result.similarityPct}%</p>
+              <p className="font-medium text-gray-900">
+                {isVi ? 'Độ tương đồng' : 'Similarity'}: {result.similarityPct}%
+              </p>
               <p className="text-xs text-gray-600">
                 {result.status === 'excellent'
-                  ? 'Rat giong'
+                  ? (isVi ? 'Rất giống' : 'Very close')
                   : result.status === 'good'
-                    ? 'Kha giong'
-                    : 'Can luyen them'}
+                    ? (isVi ? 'Khá giống' : 'Close')
+                    : (isVi ? 'Cần luyện thêm' : 'Needs more practice')}
               </p>
             </div>
             <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -259,8 +264,12 @@ export function WritingCanvas({
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-gray-700">
               {drawnPointCount > 0
-                ? `Da ve ${strokes.length + (activeStroke.length > 0 ? 1 : 0)} net tu do. Bam cham bai de xem do giong.`
-                : 'Viet tu do tren nen trang. He thong se cham theo hinh dang tong the.'}
+                ? (isVi
+                  ? `Đã vẽ ${strokes.length + (activeStroke.length > 0 ? 1 : 0)} nét tự do. Bấm chấm bài để xem độ giống.`
+                  : `Drew ${strokes.length + (activeStroke.length > 0 ? 1 : 0)} freehand strokes. Press check to see similarity.`)
+                : (isVi
+                  ? 'Viết tự do trên nền trắng. Hệ thống sẽ chấm theo hình dạng tổng thể.'
+                  : 'Write freely on the white canvas. The system scores overall shape.')}
             </p>
           </div>
         )}
@@ -271,7 +280,7 @@ export function WritingCanvas({
           onClick={showReference}
           className="flex-1 rounded-xl border border-border bg-white py-2.5 text-sm text-gray-800 transition-colors hover:border-pinyin hover:text-pinyin"
         >
-          Xem net chuan
+          {isVi ? 'Xem nét chuẩn' : 'Show model'}
         </button>
 
         <button
@@ -279,20 +288,22 @@ export function WritingCanvas({
           disabled={drawnPointCount === 0}
           className="flex-1 rounded-xl border border-pinyin/40 bg-pinyin/10 py-2.5 text-sm font-medium text-pinyin transition-colors hover:bg-pinyin/20 disabled:opacity-40"
         >
-          Cham bai
+          {isVi ? 'Chấm bài' : 'Check'}
         </button>
 
         <button
           onClick={reset}
           className="flex-1 rounded-xl border border-border bg-white py-2.5 text-sm text-gray-800 transition-colors hover:border-red-400 hover:text-red-600"
         >
-          Viet lai
+          {isVi ? 'Viết lại' : 'Rewrite'}
         </button>
       </div>
 
       {phase === 'done' && result?.fallbackMode && (
         <p className="text-xs text-gray-500">
-          Dang cham theo do giong hinh dang, bo qua khac biet to nho va vi tri.
+          {isVi
+            ? 'Đang chấm theo độ giống hình dạng, bỏ qua khác biệt to nhỏ và vị trí.'
+            : 'Scoring shape similarity while ignoring small scale and position differences.'}
         </p>
       )}
     </div>

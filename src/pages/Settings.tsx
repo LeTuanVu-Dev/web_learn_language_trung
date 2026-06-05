@@ -18,8 +18,8 @@ export function Settings() {
           value={settings.primaryLanguage}
           onChange={(value) => settings.set('primaryLanguage', value as Lang)}
           options={[
-            { value: 'vi', label: 'Tiếng Việt', sub: 'Việt → Trung' },
-            { value: 'en', label: 'English', sub: 'English → Chinese' },
+            { value: 'vi', label: isVi ? 'Tiếng Việt' : 'Vietnamese', sub: isVi ? 'Việt → Trung' : 'Vietnamese → Chinese' },
+            { value: 'en', label: isVi ? 'Tiếng Anh' : 'English', sub: isVi ? 'Anh → Trung' : 'English → Chinese' },
           ]}
         />
         <Toggle

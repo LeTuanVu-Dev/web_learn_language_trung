@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx'
-import { DeckImportPreview, ImportedWordEntry } from '../types'
+import { DeckImportPreview, ImportedWordEntry, Lang } from '../types'
 
 function normalizeHeader(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, '')
@@ -16,7 +16,8 @@ function splitMultiValue(value: string) {
   )
 }
 
-function parseRows(rows: Record<string, unknown>[], sourceLabel: string): DeckImportPreview {
+function parseRows(rows: Record<string, unknown>[], sourceLabel: string, lang: Lang): DeckImportPreview {
+  const isVi = lang === 'vi'
   const errors: string[] = []
   const wordMap = new Map<string, ImportedWordEntry>()
   let validRows = 0
@@ -40,12 +41,16 @@ function parseRows(rows: Record<string, unknown>[], sourceLabel: string): DeckIm
     const hskLevel = Number.parseInt(hskRaw || '', 10)
 
     if (!hanzi) {
-      errors.push(`Dong ${index + 2}: thieu cot hanzi/chinese/word.`)
+      errors.push(isVi
+        ? `Dòng ${index + 2}: thiếu cột hanzi/chinese/word.`
+        : `Row ${index + 2}: missing hanzi/chinese/word column.`)
       return
     }
 
     if (!pinyin && meaningsVi.length === 0 && meaningsEn.length === 0) {
-      errors.push(`Dong ${index + 2}: can it nhat pinyin hoac nghia VI/EN.`)
+      errors.push(isVi
+        ? `Dòng ${index + 2}: cần ít nhất pinyin hoặc nghĩa VI/EN.`
+        : `Row ${index + 2}: requires at least pinyin or a VI/EN meaning.`)
       return
     }
 
@@ -93,9 +98,9 @@ function parseRows(rows: Record<string, unknown>[], sourceLabel: string): DeckIm
   }
 }
 
-export async function parseDeckImportFile(file: File): Promise<DeckImportPreview> {
+export async function parseDeckImportFile(file: File, lang: Lang = 'vi'): Promise<DeckImportPreview> {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, { defval: '' })
-  return parseRows(rows, file.name)
+  return parseRows(rows, file.name, lang)
 }

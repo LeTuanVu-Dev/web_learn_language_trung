@@ -55,7 +55,6 @@ export function Lesson() {
   const allWords = useVocabularyStore((state) => state.words)
   const officialTopics = useVocabularyStore((state) => state.officialTopics)
   const syncStatus = useVocabularyStore((state) => state.syncStatus)
-  const syncMessage = useVocabularyStore((state) => state.syncMessage)
   const radicals = useMemo(() => getAllRadicals(), [])
   const hskLevels = useMemo(() => {
     const levels = new Set<number>()
@@ -124,7 +123,9 @@ export function Lesson() {
     return (
       <div className="flex flex-col items-center gap-6 py-8">
         <div className="font-hanzi text-5xl text-hanzi">完成</div>
-        <p className="text-gray-700">Bai hoc hoan tat · {correct}/{steps.length} buoc dung</p>
+        <p className="text-gray-700">
+          {isVi ? 'Bài học hoàn tất' : 'Lesson complete'} · {correct}/{steps.length} {isVi ? 'bước đúng' : 'correct steps'}
+        </p>
         <button
           onClick={regenerate}
           className="rounded-xl border border-pinyin/50 bg-pinyin/10 px-6 py-3 text-pinyin transition-colors hover:bg-pinyin/20"
@@ -148,7 +149,6 @@ export function Lesson() {
           onRegenerate={regenerate}
           toggleMode={toggleMode}
           syncStatus={syncStatus}
-          syncMessage={syncMessage}
         />
         <div className="rounded-2xl border border-border bg-surface-2 p-4 text-sm text-gray-700">
           {isVi ? 'Không tìm thấy dữ liệu phù hợp với bộ lọc hiện tại.' : 'No data matches the current filters.'}
@@ -172,11 +172,10 @@ export function Lesson() {
         onRegenerate={regenerate}
         toggleMode={toggleMode}
         syncStatus={syncStatus}
-        syncMessage={syncMessage}
       />
 
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>Bai hoc · {index + 1}/{steps.length}</span>
+        <span>{isVi ? 'Bài học' : 'Lesson'} · {index + 1}/{steps.length}</span>
         <span className={step.type === 'flashcard' ? 'text-hanzi' : step.type === 'quiz' ? 'text-pinyin' : 'text-vi'}>
           {step.type === 'flashcard' ? 'Flashcard' : step.type === 'quiz' ? 'Quiz' : 'Writing'}
         </span>
@@ -280,7 +279,6 @@ function LessonControls({
   onRegenerate,
   toggleMode,
   syncStatus,
-  syncMessage,
 }: {
   spec: LessonSpec
   setSpec: Dispatch<SetStateAction<LessonSpec>>
@@ -291,7 +289,6 @@ function LessonControls({
   onRegenerate: () => void
   toggleMode: (mode: LessonSpec['modeMix'][number]) => void
   syncStatus: string
-  syncMessage: string
 }) {
   const { primaryLanguage } = useSettings()
   const isVi = primaryLanguage === 'vi'
@@ -314,7 +311,9 @@ function LessonControls({
       </div>
 
       <p className={`text-xs ${syncStatus === 'loading' ? 'text-pinyin' : 'text-gray-600'}`}>
-        {syncStatus === 'loading' ? (isVi ? 'Đang đồng bộ chủ đề...' : 'Syncing topics...') : syncMessage}
+        {syncStatus === 'loading'
+          ? (isVi ? 'Đang đồng bộ chủ đề...' : 'Syncing topics...')
+          : (isVi ? 'Đang dùng cache chủ đề dự phòng.' : 'Using fallback topic cache.')}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
