@@ -26,6 +26,8 @@ export function LangDisplay({
   const primaryMeanings = lang === 'vi' ? word.meaningsVi : word.meaningsEn
   const secondaryMeanings = lang === 'vi' ? word.meaningsEn : word.meaningsVi
   const primaryFallback = lang === 'vi' ? word.meaningsEn : word.meaningsVi
+  const primarySeparator = lang === 'vi' ? '；' : ', '
+  const secondarySeparator = lang === 'vi' ? ', ' : '；'
   const secLabel = lang === 'vi' ? 'EN' : 'VI'
 
   return (
@@ -38,14 +40,14 @@ export function LangDisplay({
 
       {showPrimary && (primaryMeanings.length > 0 || primaryFallback.length > 0) && (
         <p className={`font-ui leading-snug text-gray-900 ${compact ? 'text-sm' : 'text-base'}`}>
-          {(primaryMeanings.length > 0 ? primaryMeanings : primaryFallback).join('；')}
+          {(primaryMeanings.length > 0 ? primaryMeanings : primaryFallback).join(primarySeparator)}
         </p>
       )}
 
       {showSec && secondaryMeanings.length > 0 && (
         <p className={`font-ui text-gray-700 ${compact ? 'text-xs' : 'text-sm'}`}>
           <span className="mr-1.5 rounded border border-gray-300 px-1 text-xs">{secLabel}</span>
-          {secondaryMeanings.join(', ')}
+          {secondaryMeanings.join(secondarySeparator)}
         </p>
       )}
     </div>

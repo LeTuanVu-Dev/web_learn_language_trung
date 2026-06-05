@@ -50,6 +50,7 @@ function buildSteps(words: WordEntry[], lang: 'vi' | 'en', mix: LessonSpec['mode
 
 export function Lesson() {
   const settings = useSettings()
+  const isVi = settings.primaryLanguage === 'vi'
   const { decks } = useDecks()
   const allWords = useVocabularyStore((state) => state.words)
   const officialTopics = useVocabularyStore((state) => state.officialTopics)
@@ -128,7 +129,7 @@ export function Lesson() {
           onClick={regenerate}
           className="rounded-xl border border-pinyin/50 bg-pinyin/10 px-6 py-3 text-pinyin transition-colors hover:bg-pinyin/20"
         >
-          Tao lesson moi
+          {isVi ? 'Tạo lesson mới' : 'Create new lesson'}
         </button>
       </div>
     )
@@ -150,7 +151,7 @@ export function Lesson() {
           syncMessage={syncMessage}
         />
         <div className="rounded-2xl border border-border bg-surface-2 p-4 text-sm text-gray-700">
-          Khong tim thay du lieu phu hop voi bo loc hien tai.
+          {isVi ? 'Không tìm thấy dữ liệu phù hợp với bộ lọc hiện tại.' : 'No data matches the current filters.'}
         </div>
       </div>
     )
@@ -211,6 +212,8 @@ function LessonWriteStep({
 }) {
   const [revealed, setRevealed] = useState(false)
   const [result, setResult] = useState<WritingScoreResult | null>(null)
+  const { primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
 
   return (
     <div className="flex flex-col gap-4">
@@ -218,10 +221,12 @@ function LessonWriteStep({
         <div className="flex items-center justify-between">
           <div>
             <p className="font-hanzi text-5xl text-hanzi">{char}</p>
-            <p className="mt-1 text-xs text-gray-600">Viet xong roi cham theo do giong hinh dang.</p>
+            <p className="mt-1 text-xs text-gray-600">
+              {isVi ? 'Viết xong rồi chấm theo độ giống hình dạng.' : 'Write it, then score by shape similarity.'}
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-600">Tu goc</p>
+            <p className="text-xs text-gray-600">{isVi ? 'Từ gốc' : 'Source word'}</p>
             <p className="font-hanzi text-2xl text-gray-900">{word.hanzi}</p>
           </div>
         </div>
@@ -238,7 +243,7 @@ function LessonWriteStep({
       {revealed && result && (
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface-2 p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-900">Dap an cua tu</p>
+            <p className="text-sm text-gray-900">{isVi ? 'Đáp án của từ' : 'Word answer'}</p>
             <p className={`text-xs ${
               result.status === 'excellent'
                 ? 'text-green-600'
@@ -246,7 +251,7 @@ function LessonWriteStep({
                   ? 'text-amber-600'
                   : 'text-red-600'
             }`}>
-              {result.similarityPct}% tuong dong
+              {result.similarityPct}% {isVi ? 'tương đồng' : 'similar'}
             </p>
           </div>
           <div>
@@ -257,7 +262,7 @@ function LessonWriteStep({
             onClick={onDone}
             className="w-full rounded-xl border border-pinyin/50 bg-pinyin/10 py-3 text-sm font-medium text-pinyin transition-colors hover:bg-pinyin/20"
           >
-            Buoc tiep theo
+            {isVi ? 'Bước tiếp theo' : 'Next step'}
           </button>
         </div>
       )}
@@ -288,28 +293,33 @@ function LessonControls({
   syncStatus: string
   syncMessage: string
 }) {
+  const { primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
+
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-border bg-surface-2 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">Lesson ngau nhien</h1>
-          <p className="mt-1 text-xs text-gray-600">Chon nguon hoc roi tao phien luyen moi.</p>
+          <h1 className="text-lg font-semibold text-gray-900">{isVi ? 'Lesson ngẫu nhiên' : 'Random lesson'}</h1>
+          <p className="mt-1 text-xs text-gray-600">
+            {isVi ? 'Chọn nguồn học rồi tạo phiên luyện mới.' : 'Choose a source, then generate a new practice session.'}
+          </p>
         </div>
         <button
           onClick={onRegenerate}
           className="rounded-xl border border-pinyin/40 px-3 py-2 text-xs text-pinyin transition-colors hover:bg-pinyin/10"
         >
-          Random lai
+          {isVi ? 'Random lại' : 'Shuffle'}
         </button>
       </div>
 
       <p className={`text-xs ${syncStatus === 'loading' ? 'text-pinyin' : 'text-gray-600'}`}>
-        {syncStatus === 'loading' ? 'Dang dong bo chu de...' : syncMessage}
+        {syncStatus === 'loading' ? (isVi ? 'Đang đồng bộ chủ đề...' : 'Syncing topics...') : syncMessage}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          Nguon hoc
+          {isVi ? 'Nguồn học' : 'Source'}
           <select
             value={spec.source}
             onChange={(event) => setSpec((current) => ({
@@ -318,17 +328,17 @@ function LessonControls({
             }))}
             className="rounded-xl border border-border bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-pinyin"
           >
-            <option value="all">Toan thu vien</option>
-            <option value="hsk">Theo HSK</option>
-            <option value="topic">Theo chu de</option>
-            <option value="radical">Theo bo thu</option>
-            <option value="deck">Theo bo the</option>
-            <option value="mixed">Tron ngau nhien</option>
+            <option value="all">{isVi ? 'Toàn thư viện' : 'Full library'}</option>
+            <option value="hsk">{isVi ? 'Theo HSK' : 'By HSK'}</option>
+            <option value="topic">{isVi ? 'Theo chủ đề' : 'By topic'}</option>
+            <option value="radical">{isVi ? 'Theo bộ thủ' : 'By radical'}</option>
+            <option value="deck">{isVi ? 'Theo bộ thẻ' : 'By deck'}</option>
+            <option value="mixed">{isVi ? 'Trộn ngẫu nhiên' : 'Mixed random'}</option>
           </select>
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          So muc
+          {isVi ? 'Số mục' : 'Item count'}
           <select
             value={spec.size}
             onChange={(event) => setSpec((current) => ({
@@ -346,7 +356,7 @@ function LessonControls({
 
       {spec.source === 'hsk' && (
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          Cap HSK
+          {isVi ? 'Cấp HSK' : 'HSK level'}
           <select
             value={spec.filters.hskLevel ?? hskLevels[0] ?? 1}
             onChange={(event) => setSpec((current) => ({
@@ -367,7 +377,7 @@ function LessonControls({
 
       {spec.source === 'topic' && (
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          Chu de
+          {isVi ? 'Chủ đề' : 'Topic'}
           <select
             value={spec.filters.topic ?? topics[0]?.name ?? ''}
             onChange={(event) => setSpec((current) => ({
@@ -388,7 +398,7 @@ function LessonControls({
 
       {spec.source === 'radical' && (
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          Bo thu
+          {isVi ? 'Bộ thủ' : 'Radical'}
           <select
             value={spec.filters.radical ?? radicals[0] ?? ''}
             onChange={(event) => setSpec((current) => ({
@@ -409,7 +419,7 @@ function LessonControls({
 
       {spec.source === 'deck' && (
         <label className="flex flex-col gap-1 text-xs text-gray-600">
-          Bo the
+          {isVi ? 'Bộ thẻ' : 'Deck'}
           <select
             value={spec.filters.deckId ?? decks[0]?.id ?? ''}
             onChange={(event) => setSpec((current) => ({
@@ -421,7 +431,7 @@ function LessonControls({
             }))}
             className="rounded-xl border border-border bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-pinyin"
           >
-            {decks.length === 0 && <option value="">Chua co bo the rieng</option>}
+            {decks.length === 0 && <option value="">{isVi ? 'Chưa có bộ thẻ riêng' : 'No custom decks yet'}</option>}
             {decks.map((deck) => (
               <option key={deck.id} value={deck.id}>{deck.name}</option>
             ))}
@@ -433,7 +443,7 @@ function LessonControls({
         {([
           ['flashcard', 'Flashcard'],
           ['quiz', 'Quiz'],
-          ['write', 'Writing'],
+          ['write', isVi ? 'Luyện viết' : 'Writing'],
         ] as const).map(([value, label]) => {
           const active = spec.modeMix.includes(value)
           return (

@@ -19,6 +19,7 @@ export function Write() {
   const [params] = useSearchParams()
   const wordParam = params.get('word')
   const { primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
   const allWords = useVocabularyStore((state) => state.words)
 
   const words: WordEntry[] = useMemo(() => {
@@ -35,7 +36,7 @@ export function Write() {
   const [result, setResult] = useState<WritingScoreResult | null>(null)
 
   const word = words[index]
-  if (!word) return <div className="py-8 text-center text-gray-600">Khong co du lieu.</div>
+  if (!word) return <div className="py-8 text-center text-gray-600">{isVi ? 'Không có dữ liệu.' : 'No data.'}</div>
 
   const chars = Array.from(word.simplified)
   const currentChar = chars[charIndex] ?? chars[0]
@@ -74,7 +75,7 @@ export function Write() {
   return (
     <div className="flex flex-col gap-5 py-4">
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>Luyen viet</span>
+        <span>{isVi ? 'Luyện viết' : 'Writing'}</span>
         <span>{index + 1} / {words.length}</span>
       </div>
 
@@ -84,11 +85,13 @@ export function Write() {
             <p className="text-xs uppercase tracking-[0.2em] text-gray-600">Prompt</p>
             <p className="mt-1 text-2xl font-semibold text-gray-900">{promptMeaning}</p>
             <p className="mt-2 text-xs text-gray-600">
-              Tu nho chu Trung, viet xong bam <span className="font-medium">Cham bai</span> de xem do giong.
+              {isVi ? 'Từ nhớ chữ Trung, viết xong bấm ' : 'Write the Chinese character from memory, then press '}
+              <span className="font-medium">{isVi ? 'Chấm bài' : 'Check'}</span>
+              {isVi ? ' để xem độ giống.' : ' to see similarity.'}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase tracking-[0.2em] text-gray-600">Tien do chu</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-gray-600">{isVi ? 'Tiến độ chữ' : 'Character'}</p>
             <p className="mt-1 font-hanzi text-2xl text-hanzi">{chars.length > 1 ? `${charIndex + 1}/${chars.length}` : '1/1'}</p>
           </div>
         </div>
@@ -121,7 +124,7 @@ export function Write() {
                   ? 'text-amber-700'
                   : 'text-red-700'
             }`}>
-              {result.similarityPct}% tuong dong
+              {result.similarityPct}% {isVi ? 'tương đồng' : 'similar'}
             </span>
           </div>
           <LangDisplay word={word} showPrimary showSecondary showPinyin />
@@ -132,7 +135,11 @@ export function Write() {
               {word.examples[0].pinyin && (
                 <p className="text-xs text-pinyin">{word.examples[0].pinyin}</p>
               )}
-              <p className="mt-0.5 text-sm text-gray-800">{word.examples[0].vi ?? word.examples[0].en}</p>
+              <p className="mt-0.5 text-sm text-gray-800">
+                {isVi
+                  ? (word.examples[0].vi ?? word.examples[0].en)
+                  : (word.examples[0].en ?? word.examples[0].vi)}
+              </p>
             </div>
           )}
         </div>
@@ -144,14 +151,14 @@ export function Write() {
             onClick={nextChar}
             className="flex-1 rounded-xl border border-pinyin/50 bg-white py-3 text-sm text-pinyin transition-colors hover:bg-pinyin/10"
           >
-            Chu tiep theo
+            {isVi ? 'Chữ tiếp theo' : 'Next character'}
           </button>
         )}
         <button
           onClick={nextWord}
           className="flex-1 rounded-xl border border-border bg-white py-3 text-sm text-gray-800 transition-colors hover:border-gray-500"
         >
-          Tu tiep theo
+          {isVi ? 'Từ tiếp theo' : 'Next word'}
         </button>
       </div>
     </div>

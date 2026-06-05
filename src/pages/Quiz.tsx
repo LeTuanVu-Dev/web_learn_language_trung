@@ -12,6 +12,7 @@ export function Quiz() {
   const deckParam = params.get('deck') ?? 'hsk1'
   const { primaryLanguage: lang } = useSettings()
   const allWords = useVocabularyStore((state) => state.words)
+  const isVi = lang === 'vi'
 
   const pool = useMemo(() => {
     const words = getDeckWords(deckParam, allWords)
@@ -67,9 +68,11 @@ export function Quiz() {
       <div className="flex flex-col items-center gap-6 py-8">
         <div className="font-hanzi text-5xl text-hanzi">{pct >= 80 ? '优秀' : pct >= 60 ? '良好' : '加油'}</div>
         <div className="text-center">
-          <p className="text-lg font-medium text-gray-900">{pct}% chinh xac</p>
+          <p className="text-lg font-medium text-gray-900">
+            {isVi ? `${pct}% chính xác` : `${pct}% correct`}
+          </p>
           <p className="mt-1 text-sm text-gray-700">
-            Dung: <span className="text-green-600">{correctCount}</span> / {results.length}
+            {isVi ? 'Đúng' : 'Correct'}: <span className="text-green-600">{correctCount}</span> / {results.length}
           </p>
         </div>
 
@@ -104,7 +107,7 @@ export function Quiz() {
           onClick={restart}
           className="w-full max-w-xs rounded-xl border border-pinyin/50 bg-pinyin/10 py-3 text-sm font-medium text-pinyin transition-colors hover:bg-pinyin/20"
         >
-          Lam lai
+          {isVi ? 'Làm lại' : 'Restart'}
         </button>
       </div>
     )
@@ -116,8 +119,8 @@ export function Quiz() {
   return (
     <div className="flex flex-col gap-4 py-4">
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>Cau {qIndex + 1} / {questions.length}</span>
-        <span className="text-green-600">{correctCount} dung</span>
+        <span>{isVi ? 'Câu' : 'Question'} {qIndex + 1} / {questions.length}</span>
+        <span className="text-green-600">{correctCount} {isVi ? 'đúng' : 'correct'}</span>
       </div>
       <div className="h-1 overflow-hidden rounded-full bg-surface-3">
         <div className="h-full rounded-full bg-pinyin/60 transition-all duration-300" style={{ width: `${progress}%` }} />

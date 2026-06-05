@@ -13,7 +13,8 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
   const [flipped, setFlipped] = useState(false)
   const [exiting, setExiting] = useState(false)
   const [showHintPinyin, setShowHintPinyin] = useState(false)
-  const { showPinyin, showSecondaryLanguage } = useSettings()
+  const { showPinyin, showSecondaryLanguage, primaryLanguage } = useSettings()
+  const isVi = primaryLanguage === 'vi'
 
   function flip() {
     setFlipped((value) => !value)
@@ -42,7 +43,7 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
         {!flipped ? (
           <div className="flex animate-slide-up flex-col items-center gap-3">
             <p className="font-hanzi text-7xl leading-none text-hanzi">{word.hanzi}</p>
-            <p className="mt-4 text-xs text-gray-600">Nhan de lat the</p>
+            <p className="mt-4 text-xs text-gray-600">{isVi ? 'Nhấn để lật thẻ' : 'Tap to flip'}</p>
             {showPinyin && (
               <button
                 type="button"
@@ -52,7 +53,7 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
                 }}
                 className="rounded-full border border-pinyin/30 px-3 py-1 text-xs text-pinyin hover:bg-pinyin/10"
               >
-                {showHintPinyin ? word.pinyin : 'Goi y pinyin'}
+                {showHintPinyin ? word.pinyin : (isVi ? 'Gợi ý pinyin' : 'Pinyin hint')}
               </button>
             )}
           </div>
@@ -64,13 +65,15 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
 
             {word.examples.length > 0 && (
               <div className="mt-2 w-full text-left">
-                <p className="mb-1 text-xs text-gray-600">Vi du</p>
+                <p className="mb-1 text-xs text-gray-600">{isVi ? 'Ví dụ' : 'Example'}</p>
                 <p className="font-hanzi text-base text-gray-900">{word.examples[0].zh}</p>
                 {showHintPinyin && showPinyin && word.examples[0].pinyin && (
                   <p className="text-xs text-pinyin">{word.examples[0].pinyin}</p>
                 )}
                 <p className="mt-0.5 text-sm text-gray-800">
-                  {word.examples[0].vi ?? word.examples[0].en ?? ''}
+                  {isVi
+                    ? (word.examples[0].vi ?? word.examples[0].en ?? '')
+                    : (word.examples[0].en ?? word.examples[0].vi ?? '')}
                 </p>
               </div>
             )}
@@ -84,14 +87,14 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
                 }}
                 className="rounded-full border border-pinyin/30 px-3 py-1 text-xs text-pinyin hover:bg-pinyin/10"
               >
-                Hien pinyin
+                {isVi ? 'Hiện pinyin' : 'Show pinyin'}
               </button>
             )}
 
             {word.radicals.length > 0 && (
               <p className="text-xs text-gray-700">
-                Bo thu: {word.radicals.join(' · ')}
-                {word.strokeCount ? ` · ${word.strokeCount} net` : ''}
+                {isVi ? 'Bộ thủ' : 'Radicals'}: {word.radicals.join(' · ')}
+                {word.strokeCount ? ` · ${word.strokeCount} ${isVi ? 'nét' : 'strokes'}` : ''}
               </p>
             )}
           </div>
@@ -105,27 +108,27 @@ export function FlashCard({ word, onNext, showWriteLink = false }: Props) {
               href={`#/write?word=${word.id}`}
               className="flex-1 rounded-xl border border-border py-3 text-center text-sm font-medium text-gray-800 transition-colors hover:border-pinyin hover:text-pinyin"
             >
-              Luyen viet
+              {isVi ? 'Luyện viết' : 'Write'}
             </a>
           )}
           <button
             onClick={() => handleNext(false)}
             className="flex-1 rounded-xl border border-red-300 bg-red-50 py-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
           >
-            Chua nho
+            {isVi ? 'Chưa nhớ' : 'Review'}
           </button>
           <button
             onClick={() => handleNext(true)}
             className="flex-1 rounded-xl border border-green-300 bg-green-50 py-3 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
           >
-            Da nho
+            {isVi ? 'Đã nhớ' : 'Known'}
           </button>
         </div>
       )}
 
       {!flipped && (
         <p className="mt-3 text-xs text-gray-600">
-          {word.hskLevel ? `HSK ${word.hskLevel}` : ''} · {word.topics[0] ?? 'Khong gan chu de'}
+          {word.hskLevel ? `HSK ${word.hskLevel}` : ''} · {word.topics[0] ?? (isVi ? 'Không gắn chủ đề' : 'No topic')}
         </p>
       )}
     </div>

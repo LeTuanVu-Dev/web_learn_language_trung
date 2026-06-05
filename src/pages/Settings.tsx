@@ -4,24 +4,27 @@ import { Lang, WritingCheckMode } from '../types'
 
 export function Settings() {
   const settings = useSettings()
+  const isVi = settings.primaryLanguage === 'vi'
 
   return (
     <div className="flex flex-col gap-6 py-4">
-      <h1 className="text-lg font-semibold text-gray-900">Cai dat</h1>
+      <h1 className="text-lg font-semibold text-gray-900">
+        {isVi ? 'Cài đặt' : 'Settings'}
+      </h1>
 
-      <Section title="Ngon ngu hoc">
+      <Section title={isVi ? 'Ngôn ngữ học' : 'Learning Language'}>
         <RadioGroup
-          label="Ngon ngu chinh"
+          label={isVi ? 'Ngôn ngữ chính' : 'Primary language'}
           value={settings.primaryLanguage}
           onChange={(value) => settings.set('primaryLanguage', value as Lang)}
           options={[
-            { value: 'vi', label: 'Tieng Viet', sub: 'Trung → Viet' },
-            { value: 'en', label: 'English', sub: 'Chinese → English' },
+            { value: 'vi', label: 'Tiếng Việt', sub: 'Việt → Trung' },
+            { value: 'en', label: 'English', sub: 'English → Chinese' },
           ]}
         />
         <Toggle
-          label="Hien ngon ngu phu"
-          sub={settings.primaryLanguage === 'vi' ? 'Hien them nghia tieng Anh' : 'Hien them nghia tieng Viet'}
+          label={isVi ? 'Hiện ngôn ngữ phụ' : 'Show secondary language'}
+          sub={isVi ? 'Hiện thêm nghĩa tiếng Anh' : 'Show Vietnamese meanings too'}
           value={settings.showSecondaryLanguage}
           onChange={(value) => settings.set('showSecondaryLanguage', value)}
         />
@@ -29,22 +32,26 @@ export function Settings() {
 
       <Section title="Pinyin">
         <Toggle
-          label="Cho phep pinyin o hint/dap an"
-          sub="Khong hien san tren mat hoc chinh; chi hien khi goi y hoac sau khi tra loi."
+          label={isVi ? 'Cho phép pinyin ở gợi ý/đáp án' : 'Allow pinyin in hints/answers'}
+          sub={
+            isVi
+              ? 'Không hiện sẵn trên mặt học chính; chỉ hiện khi gợi ý hoặc sau khi trả lời.'
+              : 'Hidden on the main prompt; shown only as a hint or after answering.'
+          }
           value={settings.showPinyin}
           onChange={(value) => settings.set('showPinyin', value)}
         />
       </Section>
 
-      <Section title="Luyen viet">
+      <Section title={isVi ? 'Luyện viết' : 'Writing Practice'}>
         <RadioGroup
-          label="Che do cham"
+          label={isVi ? 'Chế độ chấm' : 'Scoring mode'}
           value={settings.writingCheckMode}
           onChange={(value) => settings.set('writingCheckMode', value as WritingCheckMode)}
           options={[
-            { value: 'auto', label: 'Tu dong', sub: 'Uu tien cham theo do giong hinh dang.' },
-            { value: 'strict', label: 'Strict', sub: 'Gan nhan strict de phan biet ket qua, nhung van hien % tuong dong.' },
-            { value: 'shape', label: 'Shape', sub: 'Cham theo hinh dang tong the, bo qua khac biet to nho.' },
+            { value: 'auto', label: isVi ? 'Tự động' : 'Auto', sub: isVi ? 'Ưu tiên chấm theo độ giống hình dạng.' : 'Prefer shape similarity scoring.' },
+            { value: 'strict', label: 'Strict', sub: isVi ? 'Gắn nhãn strict để phân biệt kết quả, nhưng vẫn hiện % tương đồng.' : 'Marks strict results while still showing similarity percent.' },
+            { value: 'shape', label: 'Shape', sub: isVi ? 'Chấm theo hình dạng tổng thể, bỏ qua khác biệt to nhỏ.' : 'Scores overall shape and ignores small scale differences.' },
           ]}
         />
       </Section>
@@ -54,7 +61,7 @@ export function Settings() {
           onClick={settings.reset}
           className="w-full rounded-xl border border-border py-3 text-sm text-gray-700 transition-colors hover:border-red-400 hover:text-red-700"
         >
-          Dat lai ve mac dinh
+          {isVi ? 'Đặt lại về mặc định' : 'Reset to defaults'}
         </button>
       </div>
     </div>

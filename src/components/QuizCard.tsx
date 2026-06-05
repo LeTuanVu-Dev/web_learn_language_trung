@@ -15,6 +15,7 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
   const [state, setState] = useState<State>('unanswered')
   const [showHintPinyin, setShowHintPinyin] = useState(false)
   const { showPinyin, showSecondaryLanguage } = useSettings()
+  const isVi = question.lang === 'vi'
 
   const word = wordMap.get(question.wordId)
   const isHanziPrompt = question.type === 'meaning-from-hanzi'
@@ -48,14 +49,14 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
               <p className="font-ui text-base text-pinyin">{question.promptPinyin}</p>
             )}
             <p className="mt-1 text-xs text-gray-600">
-              {question.lang === 'vi' ? 'Chon nghia dung' : 'Choose the correct meaning'}
+              {isVi ? 'Chọn nghĩa đúng' : 'Choose the correct meaning'}
             </p>
             {showPinyin && state === 'unanswered' && (
               <button
                 onClick={() => setShowHintPinyin((value) => !value)}
                 className="rounded-full border border-pinyin/30 px-3 py-1 text-xs text-pinyin hover:bg-pinyin/10"
               >
-                {showHintPinyin ? 'An pinyin' : 'Goi y pinyin'}
+                {showHintPinyin ? (isVi ? 'Ẩn pinyin' : 'Hide pinyin') : (isVi ? 'Gợi ý pinyin' : 'Pinyin hint')}
               </button>
             )}
           </>
@@ -66,7 +67,7 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
               <p className="text-sm text-pinyin">{word.pinyin}</p>
             )}
             <p className="mt-1 text-xs text-gray-600">
-              {question.lang === 'vi' ? 'Chon chu Han dung' : 'Pick the matching hanzi'}
+              {isVi ? 'Chọn chữ Hán đúng' : 'Pick the matching hanzi'}
             </p>
           </>
         )}
@@ -96,14 +97,14 @@ export function QuizCard({ question, wordMap, onAnswer }: Props) {
             {showPinyin && <span className="text-sm text-pinyin">{word.pinyin}</span>}
           </div>
           <p className="mt-1 text-sm text-gray-800">
-            {(question.lang === 'vi'
+            {(isVi
               ? (word.meaningsVi.length > 0 ? word.meaningsVi : word.meaningsEn)
               : (word.meaningsEn.length > 0 ? word.meaningsEn : word.meaningsVi)
-            ).join(question.lang === 'vi' ? '；' : ', ')}
+            ).join(isVi ? '；' : ', ')}
           </p>
           {showSecondaryLanguage && (
             <p className="mt-0.5 text-xs text-gray-600">
-              {(question.lang === 'vi' ? word.meaningsEn : word.meaningsVi).join(question.lang === 'vi' ? ', ' : '；')}
+              {(isVi ? word.meaningsEn : word.meaningsVi).join(isVi ? ', ' : '；')}
             </p>
           )}
         </div>

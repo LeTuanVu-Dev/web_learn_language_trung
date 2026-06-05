@@ -21,6 +21,7 @@ export function Flashcards() {
   const deckParam = params.get('deck') ?? 'hsk1'
   const { primaryLanguage: lang } = useSettings()
   const allWords = useVocabularyStore((state) => state.words)
+  const isVi = lang === 'vi'
 
   const words: WordEntry[] = useMemo(() => {
     if (wordParam) {
@@ -65,7 +66,7 @@ export function Flashcards() {
   if (!words.length) {
     return (
       <div className="py-8 text-center text-gray-600">
-        <p>Khong co tu nao trong bo the nay.</p>
+        <p>{isVi ? 'Không có từ nào trong bộ thẻ này.' : 'No words in this deck.'}</p>
       </div>
     )
   }
@@ -75,9 +76,9 @@ export function Flashcards() {
       <div className="flex flex-col items-center gap-6 py-8">
         <div className="font-hanzi text-5xl text-hanzi">完成</div>
         <div className="text-center">
-          <p className="text-lg font-medium text-gray-900">Hoan thanh</p>
+          <p className="text-lg font-medium text-gray-900">{isVi ? 'Hoàn thành' : 'Complete'}</p>
           <p className="mt-1 text-sm text-gray-700">
-            Da nho: <span className="text-green-600">{known.size}</span> / {words.length} tu
+            {isVi ? 'Đã nhớ' : 'Known'}: <span className="text-green-600">{known.size}</span> / {words.length} {isVi ? 'từ' : 'words'}
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export function Flashcards() {
             onClick={restart}
             className="w-full rounded-xl border border-pinyin/50 bg-pinyin/10 py-3 text-sm font-medium text-pinyin transition-colors hover:bg-pinyin/20"
           >
-            Hoc lai tu dau
+            {isVi ? 'Học lại từ đầu' : 'Study again'}
           </button>
           {known.size < words.length && (
             <button
@@ -96,7 +97,7 @@ export function Flashcards() {
               }}
               className="w-full rounded-xl border border-border py-3 text-sm text-gray-800 transition-colors hover:border-gray-500"
             >
-              Chi hoc tu chua nho ({words.length - known.size})
+              {isVi ? `Chỉ học từ chưa nhớ (${words.length - known.size})` : `Review unknown words (${words.length - known.size})`}
             </button>
           )}
         </div>
@@ -108,7 +109,7 @@ export function Flashcards() {
     <div className="flex flex-col gap-4 py-4">
       <div className="flex items-center justify-between text-sm text-gray-600">
         <span>{index + 1} / {words.length}</span>
-        <span className="text-green-600">{known.size} da nho</span>
+        <span className="text-green-600">{known.size} {isVi ? 'đã nhớ' : 'known'}</span>
       </div>
 
       <div className="h-1 overflow-hidden rounded-full bg-surface-3">

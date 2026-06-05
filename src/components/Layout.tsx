@@ -1,18 +1,20 @@
 import type { ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-
-const navItems = [
-  { to: '/', icon: '汉', label: 'Trang chu' },
-  { to: '/library', icon: '书', label: 'Thu vien' },
-  { to: '/flashcards', icon: '卡', label: 'Flashcard' },
-  { to: '/quiz', icon: '问', label: 'Quiz' },
-  { to: '/write', icon: '写', label: 'Luyen viet' },
-  { to: '/decks', icon: '组', label: 'Bo the' },
-]
+import { useSettings } from '../store/settings'
 
 export function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
+  const { primaryLanguage } = useSettings()
   const isHome = pathname === '/'
+  const isVi = primaryLanguage === 'vi'
+  const navItems = [
+    { to: '/', icon: '汉', label: isVi ? 'Trang chủ' : 'Home' },
+    { to: '/library', icon: '书', label: isVi ? 'Thư viện' : 'Library' },
+    { to: '/flashcards', icon: '卡', label: 'Flashcard' },
+    { to: '/quiz', icon: '问', label: 'Quiz' },
+    { to: '/write', icon: '写', label: isVi ? 'Luyện viết' : 'Write' },
+    { to: '/decks', icon: '组', label: isVi ? 'Bộ thẻ' : 'Decks' },
+  ]
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#f8f4ec] text-gray-900">
@@ -23,7 +25,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="mx-auto flex h-12 max-w-2xl items-center justify-between px-4">
             <NavLink to="/" className="font-hanzi text-2xl leading-none text-hanzi">汉</NavLink>
             <NavLink to="/settings" className="text-sm text-gray-700 transition-colors hover:text-gray-900">
-              Cai dat
+              {isVi ? 'Cài đặt' : 'Settings'}
             </NavLink>
           </div>
         </header>

@@ -11,6 +11,7 @@ export function Library() {
   const { primaryLanguage: lang } = useSettings()
   const words = useVocabularyStore((state) => state.words)
   const officialTopics = useVocabularyStore((state) => state.officialTopics)
+  const isVi = lang === 'vi'
 
   const levels = useMemo(() => {
     const hskLevels = new Set<number>()
@@ -42,13 +43,13 @@ export function Library() {
   return (
     <div className="flex flex-col gap-4 py-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-900">Thu vien</h1>
-        <span className="text-sm text-gray-600">{filtered.length} tu</span>
+        <h1 className="text-lg font-semibold text-gray-900">{isVi ? 'Thư viện' : 'Library'}</h1>
+        <span className="text-sm text-gray-600">{filtered.length} {isVi ? 'từ' : 'words'}</span>
       </div>
 
       <input
         type="search"
-        placeholder="Tim chu, pinyin, nghia..."
+        placeholder={isVi ? 'Tìm chữ, pinyin, nghĩa...' : 'Search hanzi, pinyin, meaning...'}
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 outline-none transition-colors focus:border-pinyin"
@@ -65,7 +66,7 @@ export function Library() {
                 : 'border-border text-gray-700 hover:border-gray-500'
             }`}
           >
-            {level === 'all' ? 'Tat ca' : `HSK ${level}`}
+            {level === 'all' ? (isVi ? 'Tất cả' : 'All') : `HSK ${level}`}
           </button>
         ))}
 
@@ -91,7 +92,9 @@ export function Library() {
           <WordRow key={word.id} word={word} lang={lang} />
         ))}
         {filtered.length === 0 && (
-          <p className="py-8 text-center text-sm text-gray-600">Khong tim thay muc tu phu hop.</p>
+          <p className="py-8 text-center text-sm text-gray-600">
+            {isVi ? 'Không tìm thấy mục từ phù hợp.' : 'No matching words found.'}
+          </p>
         )}
       </div>
     </div>
@@ -113,7 +116,7 @@ function WordRow({ word, lang }: { word: WordEntry; lang: string }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-xs text-pinyin">{word.pinyin || '—'}</p>
-        <p className="truncate text-sm text-gray-800">{meanings.join('；')}</p>
+        <p className="truncate text-sm text-gray-800">{meanings.join(lang === 'vi' ? '；' : ', ')}</p>
       </div>
       {word.hskLevel && (
         <span className="flex-shrink-0 rounded border border-gray-300 px-1 text-[10px] text-gray-600">
